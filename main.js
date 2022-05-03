@@ -20,6 +20,11 @@ var ball = {
     dx:3,
     dy:3
 }
+rightwristX = 0;
+rightwristY = 0;
+rightwrist_score = 0;
+
+game_status = "";
 
 function setup(){
   canvas =  createCanvas(700,600);
@@ -30,18 +35,35 @@ function setup(){
   video.hide();
 
   poseNet = ml5.poseNet(video, modelLoaded);
+  poseNet.on("pose",gotPoses);
 }
 
 function modelLoaded(){
 console.log("Model loaded");  
 }
 
+function gotPoses(results){
+if(results.length > 0){
+  console.log(results);
+rightwristX = results[0].pose.rightWrist.x;
+rightwristY = results[0].pose.rightWrist.Y;
+rightwrist_score = results[0].pose.keypoints[10].score;
+console.log("X = "+rightwristX+" Y = "+rightwristY+" Score = "+rightwrist_score);
+}
+}
 
 function draw(){
   background(0); 
   
   image(video, 0, 0 , 700, 600);
 
+  if(rightwrist_score > 0.2){
+  fill("blue");
+  stroke("blue");
+  circle(rightwristX,rightwristY,20);
+  }
+  
+if(game_status == "start"){
  fill("black");
  stroke("black");
  rect(680,0,20,700);
@@ -49,7 +71,8 @@ function draw(){
  fill("black");
  stroke("black");
  rect(0,0,20,700);
- 
+
+
    //funtion paddleInCanvas call 
    paddleInCanvas();
  
@@ -77,6 +100,7 @@ function draw(){
    
    //function move call which in very important
     move();
+}
 }
 
 
@@ -173,4 +197,10 @@ function paddleInCanvas(){
   if(mouseY < 0){
     mouseY =0;
   }  
+}
+
+function startGame(){
+game_status = "start";
+document.getElementById("game_loaded").innerHTML = "Game is loaded";
+
 }
